@@ -8,10 +8,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 //public class FirebaseConfig {
@@ -45,10 +43,13 @@ import java.io.InputStream;
 public class FirebaseConfig {
 
     @PostConstruct
-    public void initialize() throws IOException {
-        String firebasePath = EnvUtils.getEnv("FIREBASE_CREDENTIAL_PATH");
-        FileInputStream serviceAccount = new FileInputStream(firebasePath);
+    public void initialize() throws Exception {
+        String firebaseJson = EnvUtils.getEnv("FIREBASE_CREDENTIAL", null);
+        if (firebaseJson == null) {
+            throw new RuntimeException("FIREBASE_CREDENTIAL env var not found");
+        }
 
+        InputStream serviceAccount = new ByteArrayInputStream(firebaseJson.getBytes(StandardCharsets.UTF_8));
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
