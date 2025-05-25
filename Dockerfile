@@ -14,9 +14,6 @@ RUN apt-get update && \
 
 COPY . .
 
-# Copy file .env vào cùng thư mục /app
-# (Nếu .env nằm ở root project thì đã được copy ở trên rồi)
-# Nếu bạn có .dockerignore loại trừ .env, nhớ bỏ nó đi hoặc thêm copy riêng
 
 RUN gradle bootJar -x test
 
@@ -26,9 +23,6 @@ WORKDIR /app
 
 COPY --from=build /app/build/libs/music-web-be-0.0.1-SNAPSHOT.jar app.jar
 
-# Copy file .env từ build stage vào run stage
-COPY --from=build /app/.env .env
-
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
