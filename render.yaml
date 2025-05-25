@@ -8,8 +8,6 @@ services:
     dockerfilePath: Dockerfile
     autoDeploy: true
     envVars:
-      - key: APP_NAME
-        value: music-web-be
       - key: server.port
         value: 8080
 
