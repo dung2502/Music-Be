@@ -34,7 +34,9 @@ public class WebSocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Đăng ký endpoint để ReactJS kết nối
-        registry.addEndpoint("/ws").setAllowedOrigins("http://localhost:3000","http://localhost:3001").withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins(EnvUtils.getAllowedOrigins().toArray(new String[0]))
+                .withSockJS();
     }
+
 }

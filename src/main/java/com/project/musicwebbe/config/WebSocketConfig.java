@@ -17,9 +17,10 @@ public class WebSocketConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/ws/**")
-                .allowedOrigins("http://localhost:3000")
+                .allowedOrigins(EnvUtils.getAllowedOrigins().toArray(new String[0]))
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
+
 }

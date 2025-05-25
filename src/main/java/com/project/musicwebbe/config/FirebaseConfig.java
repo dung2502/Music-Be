@@ -1,18 +1,19 @@
-//package com.project.musicwebbe.config;
-//
-//import com.google.auth.oauth2.GoogleCredentials;
-//import com.google.firebase.FirebaseApp;
-//import com.google.firebase.FirebaseOptions;
-//import jakarta.annotation.PostConstruct;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//
-//import java.io.FileInputStream;
-//import java.io.FileNotFoundException;
-//import java.io.IOException;
-//import java.io.InputStream;
-//
-//@Configuration
+package com.project.musicwebbe.config;
+
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import io.github.cdimascio.dotenv.Dotenv;
+import jakarta.annotation.PostConstruct;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+@Configuration
 //public class FirebaseConfig {
 //
 //    @PostConstruct
@@ -25,41 +26,20 @@
 //    }
 //}
 
-
-package com.project.musicwebbe.config;
-
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Configuration;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-@Configuration
 public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() throws IOException {
-        String privateKey = System.getenv("FIREBASE_PRIVATE_KEY")
-                .replace("\\n", "\n");
+        Dotenv dotenv = Dotenv.load();  // Load biến từ file .env
+        String firebasePath = dotenv.get("FIREBASE_CREDENTIAL_PATH");
 
-        String clientEmail = System.getenv("FIREBASE_CLIENT_EMAIL");
-        String projectId = System.getenv("FIREBASE_PROJECT_ID");
-
-        GoogleCredentials credentials = GoogleCredentials.fromStream(
-                new ByteArrayInputStream(privateKey.getBytes())
-        );
-
+        FileInputStream serviceAccount = new FileInputStream(firebasePath);
         FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(credentials)
-                .setProjectId(projectId)
-                .setServiceAccountId(clientEmail)
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
 
-        if (FirebaseApp.getApps().isEmpty()) {
-            FirebaseApp.initializeApp(options);
-        }
+        FirebaseApp.initializeApp(options);
     }
 }
+
+
