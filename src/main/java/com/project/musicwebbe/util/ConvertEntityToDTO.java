@@ -1,0 +1,325 @@
+package com.project.musicwebbe.util;
+
+import com.project.musicwebbe.dto.albumDTO.*;
+import com.project.musicwebbe.dto.artistDTO.*;
+import com.project.musicwebbe.dto.playlistDTO.*;
+import com.project.musicwebbe.dto.songDTO.*;
+import com.project.musicwebbe.dto.userDTO.UserDTO;
+import com.project.musicwebbe.entities.*;
+import com.project.musicwebbe.entities.permission.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class ConvertEntityToDTO {
+    @Autowired
+    private GetCurrentUser getCurrentUser;
+
+    public AlbumDTO convertToAlbumDTO(Album album) {
+        AlbumDTO albumDTO = new AlbumDTO();
+        albumDTO.setAlbumId(album.getAlbumId());
+        albumDTO.setTitle(album.getTitle());
+        albumDTO.setDateCreate(album.getDateCreate());
+        albumDTO.setCoverImageUrl(album.getCoverImageUrl());
+        albumDTO.setProvide(album.getProvide());
+        if (album.getSongs() != null) {
+            List<SongOfAlbumDTO> songOfAlbumDTOS = album.getSongs().stream()
+                    .map(song -> SongOfAlbumDTO.builder()
+                            .songId(song.getSongId())
+                            .title(song.getTitle())
+                            .dateCreate(song.getDateCreate())
+                            .lyrics(song.getLyrics())
+                            .songUrl(song.getSongUrl())
+                            .duration(song.getDuration())
+                            .coverImageUrl(song.getCoverImageUrl())
+                            .artists(song.getArtists().stream()
+                                    .map(artist -> ArtistOfSongDTO.builder()
+                                            .artistId(artist.getArtistId())
+                                            .artistName(artist.getArtistName())
+                                            .build()).toList())
+                            .build()).toList();
+            albumDTO.setSongs(songOfAlbumDTOS);
+        }
+
+        if (album.getGenres() != null) {
+            albumDTO.setGenres(album.getGenres());
+        }
+
+        if (album.getArtists() != null){
+            List<ArtistOfAlbumDTO> artistOfAlbumDTOS = album.getArtists().stream()
+                    .map(artist -> {
+                        return ArtistOfAlbumDTO.builder()
+                                .artistId(artist.getArtistId())
+                                .artistName(artist.getArtistName())
+                                .avatar(artist.getAvatar())
+                                .build();
+                    }).collect(Collectors.toList());
+            albumDTO.setArtists(artistOfAlbumDTOS);
+        }
+        if (album.getFavoriteAlbums() != null) {
+            List<FavoriteAlbumDTO> favoriteDTOS = album.getFavoriteAlbums().stream()
+                    .map(favoriteAlbum -> FavoriteAlbumDTO.builder()
+                            .favoriteAlbumId(favoriteAlbum.getFavoriteAlbumId())
+                            .appUser(UserOfFavoriteAlbumDTO.builder()
+                                    .userId(favoriteAlbum.getAppUser().getUserId())
+                                    .email(favoriteAlbum.getAppUser().getEmail())
+                                    .fullName(favoriteAlbum.getAppUser().getFullName())
+                                    .userCode(favoriteAlbum.getAppUser().getUserCode()).build())
+                            .addedAt(favoriteAlbum.getAddedAt())
+                            .build()).toList();
+            albumDTO.setFavorites(favoriteDTOS);
+
+            AppUser appUser = getCurrentUser.getUser();
+            if (appUser != null) {
+                boolean userFavoriteStatus = album.getFavoriteAlbums().stream()
+                        .anyMatch(favoriteAlbum -> favoriteAlbum.getAppUser().getUserId().equals(appUser.getUserId()));
+                albumDTO.setUserFavoriteStatus(userFavoriteStatus);
+            }
+        }
+        return albumDTO;
+    }
+
+    public SongDTO convertToSongDTO(Song song) {
+        SongDTO songDTO = new SongDTO();
+        songDTO.setSongId(song.getSongId());
+        songDTO.setTitle(song.getTitle());
+        songDTO.setDateCreate(song.getDateCreate());
+        songDTO.setDuration(song.getDuration());
+        songDTO.setCoverImageUrl(song.getCoverImageUrl());
+        songDTO.setLyrics(song.getLyrics());
+        songDTO.setSongUrl(song.getSongUrl());
+        songDTO.setListens(song.getSongListens().stream().mapToInt(SongListen::getTotal).sum());
+        if (song.getAlbum() != null) {
+            AlbumOfSongDTO album = new AlbumOfSongDTO(song.getAlbum().getAlbumId(), song.getAlbum().getTitle());
+            songDTO.setAlbum(album);
+        }
+        if (song.getArtists() != null) {
+
+            List<ArtistOfSongDTO> artistOfSongDTOS = song.getArtists().stream()
+                    .map(artist -> ArtistOfSongDTO.builder()
+                            .artistId(artist.getArtistId())
+                            .artistName(artist.getArtistName())
+                            .avatar(artist.getAvatar())
+                            .build())
+                    .toList();
+            songDTO.setArtists(artistOfSongDTOS);
+        }
+        if (song.getGenres() != null) {
+            songDTO.setGenres(song.getGenres());
+        }
+        if (song.getSongListens() != null) {
+            List<SongListenDTO> songListenDTOS = song.getSongListens().stream()
+                    .map(songListen -> SongListenDTO.builder()
+                            .listensId(songListen.getListensId())
+                            .dateCreate(songListen.getDateCreate())
+                            .total(songListen.getTotal())
+                            .build()).toList();
+            songDTO.setSongListens(songListenDTOS);
+        }
+
+        if (song.getFavorites() != null) {
+            List<FavoriteDTO> favoriteDTOS = song.getFavorites().stream()
+                    .map(favorite -> FavoriteDTO.builder()
+                            .favoriteId(favorite.getFavoriteId())
+                            .appUser(UserOfFavoriteDTO.builder()
+                                    .userId(favorite.getAppUser().getUserId())
+                                    .email(favorite.getAppUser().getEmail())
+                                    .fullName(favorite.getAppUser().getFullName())
+                                    .userCode(favorite.getAppUser().getUserCode()).build())
+                            .addedAt(favorite.getAddedAt())
+                            .build()).toList();
+            songDTO.setFavorites(favoriteDTOS);
+
+            AppUser appUser = getCurrentUser.getUser();
+            if (appUser != null) {
+                boolean userFavoriteStatus = song.getFavorites().stream()
+                        .anyMatch(favorite -> favorite.getAppUser().getUserId().equals(appUser.getUserId()));
+                songDTO.setUserFavoriteStatus(userFavoriteStatus);
+            }
+        }
+
+        return songDTO;
+    }
+
+    public ArtistDTO convertToArtistDTO(Artist artist) {
+        ArtistDTO artistDTO = new ArtistDTO();
+        artistDTO.setArtistId(artist.getArtistId());
+        artistDTO.setArtistName(artist.getArtistName());
+        artistDTO.setAvatar(artist.getAvatar());
+        artistDTO.setBiography(artist.getBiography());
+        if (artist.getGenres() != null) {
+            artistDTO.setGenres(artist.getGenres());
+        }
+        if (artist.getSongs() != null) {
+            List<SongOfArtistDTO> songOfArtistDTOS = artist.getSongs().stream()
+                    .map(song -> SongOfArtistDTO.builder()
+                            .songId(song.getSongId())
+                            .title(song.getTitle())
+                            .dateCreate(song.getDateCreate())
+                            .lyrics(song.getLyrics())
+                            .songUrl(song.getSongUrl())
+                            .duration(song.getDuration())
+                            .coverImageUrl(song.getCoverImageUrl())
+                            .artists(song.getArtists().stream()
+                                    .map(artist1 -> ArtistOfSongDTO.builder()
+                                            .artistId(artist1.getArtistId())
+                                            .artistName(artist1.getArtistName())
+                                            .build()).toList())
+                            .build())
+                    .toList();
+            artistDTO.setSongs(songOfArtistDTOS);
+        }
+        if (artist.getAlbums() != null) {
+            List<AlbumOfArtistDTO> albumOfArtistDTOS = artist.getAlbums().stream()
+                    .map(album -> AlbumOfArtistDTO.builder()
+                            .albumId(album.getAlbumId())
+                            .title(album.getTitle())
+                            .provide(album.getProvide())
+                            .dateCreate(album.getDateCreate())
+                            .coverImageUrl(album.getCoverImageUrl())
+                            .build()).toList();
+            artistDTO.setAlbums(albumOfArtistDTOS);
+        }
+
+        if (artist.getFavoriteArtists() != null) {
+            List<FavoriteArtistDTO> favoriteDTOS = artist.getFavoriteArtists().stream()
+                    .map(favoriteArtist -> FavoriteArtistDTO.builder()
+                            .favoriteArtistId(favoriteArtist.getFavoriteArtistId())
+                            .appUser(UserOfFavoriteArtistDTO.builder()
+                                    .userId(favoriteArtist.getAppUser().getUserId())
+                                    .email(favoriteArtist.getAppUser().getEmail())
+                                    .fullName(favoriteArtist.getAppUser().getFullName())
+                                    .userCode(favoriteArtist.getAppUser().getUserCode()).build())
+                            .addedAt(favoriteArtist.getAddedAt())
+                            .build()).toList();
+            artistDTO.setFavorites(favoriteDTOS);
+
+            AppUser appUser = getCurrentUser.getUser();
+            if (appUser != null) {
+                boolean userFavoriteStatus = artist.getFavoriteArtists().stream()
+                        .anyMatch(favoriteArtist -> favoriteArtist.getAppUser().getUserId().equals(appUser.getUserId()));
+                artistDTO.setUserFavoriteStatus(userFavoriteStatus);
+            }
+        }
+
+        // Chuyển đổi các entity liên quan sang DTO tương ứng nếu cần
+        return artistDTO;
+    }
+
+    public PlaylistDTO convertToPlaylistDTO(Playlist playlist) {
+        PlaylistDTO playlistDTO = PlaylistDTO.builder()
+                .playlistId(playlist.getPlaylistId())
+                .playlistName(playlist.getPlaylistName())
+                .playlistCode(playlist.getPlaylistCode())
+                .coverImageUrl(playlist.getCoverImageUrl())
+                .dateCreate(playlist.getDateCreate())
+                .playlistStatus(playlist.isPlaylistStatus())
+                .description(playlist.getDescription())
+                .build();
+        if (playlist.getPlayListSongs() != null) {
+            List<SongOfPlaylistDTO> songOfPlaylistDTOS = playlist.getPlayListSongs().stream()
+                    .map(playListSong -> {
+                        Song song = playListSong.getSong();
+                        Album album = song.getAlbum();
+
+                        AlbumOfSongDTO albumDTO = null;
+                        if (album != null) {
+                            albumDTO = AlbumOfSongDTO.builder()
+                                    .albumId(album.getAlbumId())
+                                    .title(album.getTitle())
+                                    .build();
+                        }
+                        List<ArtistOfSongDTO> artistOfSongDTOS = song.getArtists() != null
+                                ? song.getArtists().stream()
+                                .map(artist -> ArtistOfSongDTO.builder()
+                                        .artistId(artist.getArtistId())
+                                        .artistName(artist.getArtistName())
+                                        .build())
+                                .toList()
+                                : List.of();
+                        return SongOfPlaylistDTO.builder()
+                                .id(playListSong.getId())
+                                .songId(song.getSongId())
+                                .title(song.getTitle())
+                                .dateAdd(playListSong.getDateAdd())
+                                .dateCreate(song.getDateCreate())
+                                .lyrics(song.getLyrics())
+                                .album(albumDTO)
+                                .songUrl(song.getSongUrl())
+                                .duration(song.getDuration())
+                                .coverImageUrl(song.getCoverImageUrl())
+                                .genres(song.getGenres())
+                                .artists(artistOfSongDTOS)
+                                .build();
+                    })
+                    .toList();
+            playlistDTO.setSongOfPlaylist(songOfPlaylistDTOS);
+        }
+
+        if (playlist.getAppUser() != null) {
+            UserOfPlaylistDTO userOfPlaylistDTO = UserOfPlaylistDTO.builder()
+                    .userId(playlist.getAppUser().getUserId())
+                    .fullName(playlist.getAppUser().getFullName())
+                    .build();
+            playlistDTO.setAppUser(userOfPlaylistDTO);
+        }
+        if (playlist.getFavoritePlaylists() != null) {
+            List<FavoritePlaylistDTO> favoriteDTOS = playlist.getFavoritePlaylists().stream()
+                    .map(favoritePlaylistDTO -> FavoritePlaylistDTO.builder()
+                            .favoritePlaylistId(favoritePlaylistDTO.getFavoritePlaylistId())
+                            .appUser(UserOfFavoritePlaylistDTO.builder()
+                                    .userId(favoritePlaylistDTO.getAppUser().getUserId())
+                                    .email(favoritePlaylistDTO.getAppUser().getEmail())
+                                    .fullName(favoritePlaylistDTO.getAppUser().getFullName())
+                                    .userCode(favoritePlaylistDTO.getAppUser().getUserCode()).build())
+                            .addedAt(favoritePlaylistDTO.getAddedAt())
+                            .build()).toList();
+            playlistDTO.setFavorites(favoriteDTOS);
+
+            AppUser appUser = getCurrentUser.getUser();
+            if (appUser != null) {
+                boolean userFavoriteStatus = playlist.getFavoritePlaylists().stream()
+                        .anyMatch(favoritePlaylist -> favoritePlaylist.getAppUser().getUserId().equals(appUser.getUserId()));
+                playlistDTO.setUserFavoriteStatus(userFavoriteStatus);
+            }
+        }
+
+        return playlistDTO;
+    }
+
+    public UserDTO convertToUserDTO(AppUser appUser) {
+        if (appUser == null) return null;
+
+        return UserDTO.builder()
+                .userId(appUser.getUserId())
+                .email(appUser.getEmail())
+                .userCode(appUser.getUserCode())
+                .dateCreate(appUser.getDateCreate())
+                .fullName(appUser.getFullName())
+                .gender(appUser.getGender())
+                .dateOfBirth(appUser.getDateOfBirth())
+                .avatar(appUser.getAvatar())
+                .phoneNumber(appUser.getPhoneNumber())
+                .address(appUser.getAddress())
+                .build();
+    }
+
+    public UserListenDTO convertUserListenDTO(UserListen userListen) {
+        if (userListen == null) return null;
+
+        return UserListenDTO.builder()
+                .listensId(userListen.getListensId())
+                .listenedAt(userListen.getListenedAt())
+                .user(SimpleUserDTO.builder()
+                        .userId(userListen.getAppUser().getUserId())
+                        .fullName(userListen.getAppUser().getFullName())
+                        .build())
+                .song(convertToSongDTO(userListen.getSong()))
+                .build();
+    }
+
+
+}
