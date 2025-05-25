@@ -26,14 +26,29 @@ import java.io.InputStream;
 //    }
 //}
 
+//public class FirebaseConfig {
+//
+//    @PostConstruct
+//    public void initialize() throws IOException {
+//        Dotenv dotenv = Dotenv.load();  // Load biến từ file .env
+//        String firebasePath = dotenv.get("FIREBASE_CREDENTIAL_PATH");
+//
+//        FileInputStream serviceAccount = new FileInputStream(firebasePath);
+//        FirebaseOptions options = FirebaseOptions.builder()
+//                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+//                .build();
+//
+//        FirebaseApp.initializeApp(options);
+//    }
+//}
+
 public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() throws IOException {
-        Dotenv dotenv = Dotenv.load();  // Load biến từ file .env
-        String firebasePath = dotenv.get("FIREBASE_CREDENTIAL_PATH");
-
+        String firebasePath = EnvUtils.getEnv("FIREBASE_CREDENTIAL_PATH");
         FileInputStream serviceAccount = new FileInputStream(firebasePath);
+
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
@@ -41,5 +56,6 @@ public class FirebaseConfig {
         FirebaseApp.initializeApp(options);
     }
 }
+
 
 

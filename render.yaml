@@ -3,7 +3,7 @@ services:
     name: music-web-be
     env: docker
     plan: free
-    branch: main  # Hoặc nhánh bạn đang deploy từ GitHub
+    branch: main
     repo: https://github.com/dung2502/Music-Fe
     dockerfilePath: Dockerfile
     autoDeploy: true
@@ -12,19 +12,13 @@ services:
         value: music-web-be
       - key: SERVER_PORT
         value: 8080
-
-      # MySQL Database
       - key: DB_URL
         value: jdbc:mysql://localhost:3306/music-web?createDatabaseIfNotExist=true
       - key: DB_USERNAME
         value: root
       - key: DB_PASSWORD
         value: 123456
-
-      # Firebase (nếu không dùng file JSON trực tiếp)
       - key: FIREBASE_CREDENTIAL_PATH
         value: src/main/resources/firebase-key/logingo-4d97c-firebase-adminsdk-666z6-63f42e4eb8.json
-
-      # CORS
       - key: CORS_ALLOWED_ORIGINS
         value: http://localhost:3000,http://localhost:3001
