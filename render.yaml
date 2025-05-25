@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: music-web-be
+    env: docker
+    plan: free
+    branch: main  # hoặc nhánh bạn đang sử dụng
+    repo: https://github.com/dung2502/Music-Fe
+    dockerfilePath: Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: music-web-be
+        value: music-web-be
+      - key: SERVER_PORT
+        value: 8080
+
+      # Database config (tùy theo bạn dùng Render PostgreSQL hay MySQL từ nơi khác)
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://localhost:3306/music-web?createDatabaseIfNotExist=true
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: 123456
+      - key: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+        value: com.mysql.cj.jdbc.Driver
+      - key: SPRING_JPA_HIBERNATE_DDL-AUTO
+        value: update
+      - key: SPRING_JPA_SHOW-SQL
+        value: "true"
+
+      # Firebase configs
+      - key: FIREBASE_TYPE
+        value: service_account
+      - key: FIREBASE_PROJECT_ID
+        value: music-g-649ea
+      - key: FIREBASE_PRIVATE_KEY_ID
+        value: 8196492751d1d0570d4396a84171febd5addd0e3
+      - key: FIREBASE_PRIVATE_KEY
+        value: "-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w...\\n-----END PRIVATE KEY-----\\n"  # Chuỗi cần escape \\n
+      - key: FIREBASE_CLIENT_EMAIL
+        value: firebase-adminsdk-pu0z4@music-g-649ea.iam.gserviceaccount.com
+      - key: FIREBASE_CLIENT_ID
+        value: "111015326692850258187"
+      - key: FIREBASE_AUTH_URI
+        value: https://accounts.google.com/o/oauth2/auth
+      - key: FIREBASE_TOKEN_URI
+        value: https://oauth2.googleapis.com/token
+      - key: FIREBASE_AUTH_PROVIDER_X509_CERT_URL
+        value: https://www.googleapis.com/oauth2/v1/certs
+      - key: FIREBASE_CLIENT_X509_CERT_URL
+        value: https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-pu0z4%40music-g-649ea.iam.gserviceaccount.com
+      - key: FIREBASE_UNIVERSE_DOMAIN
+        value: googleapis.com
