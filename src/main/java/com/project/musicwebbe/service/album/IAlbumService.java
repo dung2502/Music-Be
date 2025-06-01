@@ -19,4 +19,6 @@ public interface IAlbumService extends IGeneralService<Album> {
 
     List<Album> findNewAlbumsWithNational(String national);
 
+    Page<Album> getTopSixAlbumsBestListen(Pageable pageable);
+
 }

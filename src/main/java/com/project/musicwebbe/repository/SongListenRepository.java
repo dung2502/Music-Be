@@ -18,4 +18,8 @@ public interface SongListenRepository extends JpaRepository<SongListen, Long> {
         "FROM song_listens WHERE (date_create >= CURDATE() - INTERVAL 7 DAY) AND song_id = :songId " +
         "ORDER BY song_id, date_create ASC", nativeQuery = true)
     List<SongListen> findAllBySongIdInSevenDays(Long songId);
+
+    @Query(value = "SELECT SUM(total) FROM song_listens WHERE song_id = :songId", nativeQuery = true)
+    Integer getTotalListenBySongId(Long songId);
+
 }

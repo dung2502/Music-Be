@@ -17,7 +17,7 @@ public class PlayListSong {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "playlist_id")
     private Playlist playlist;
 

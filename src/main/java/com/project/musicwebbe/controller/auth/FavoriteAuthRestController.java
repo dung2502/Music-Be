@@ -1,9 +1,6 @@
 package com.project.musicwebbe.controller.auth;
 
-import com.project.musicwebbe.dto.favoriteDTO.FavoriteDTO;
-import com.project.musicwebbe.dto.songDTO.AlbumOfSongDTO;
-import com.project.musicwebbe.dto.songDTO.ArtistOfSongDTO;
-import com.project.musicwebbe.dto.songDTO.SongDTO;
+import com.project.musicwebbe.dto.favoriteDTO.FavoriteDTOT;
 import com.project.musicwebbe.entities.*;
 import com.project.musicwebbe.entities.permission.AppUser;
 import com.project.musicwebbe.service.favorite.IFavoriteAlbumService;
@@ -11,17 +8,15 @@ import com.project.musicwebbe.service.favorite.IFavoriteArtistService;
 import com.project.musicwebbe.service.favorite.IFavoritePlaylistService;
 import com.project.musicwebbe.service.favorite.IFavoriteService;
 import com.project.musicwebbe.service.permission.impl.UserService;
+import com.project.musicwebbe.util.ConvertEntityToDTO;
 import com.project.musicwebbe.util.GetCurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth/favorites")
@@ -43,6 +38,9 @@ public class FavoriteAuthRestController {
     private UserService userService;
 
     @Autowired
+    private ConvertEntityToDTO convertEntityToDTO;
+
+    @Autowired
     private GetCurrentUser getCurrentUser;
 
     @GetMapping
@@ -52,6 +50,18 @@ public class FavoriteAuthRestController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(favorites);
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List<FavoriteDTOT>> getAllFavorites(Long userId) {
+        List<Favorite> favorites = favoriteService.findAllByAppUser_UserId(userId);
+        if (favorites.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<FavoriteDTOT> favoriteDTOTS = favorites.stream()
+                .map(convertEntityToDTO::convertToFavoriteDTO)
+                .toList();
+        return ResponseEntity.ok(favoriteDTOTS);
     }
 
     @PostMapping("/song")

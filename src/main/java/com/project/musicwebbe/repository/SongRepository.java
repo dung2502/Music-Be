@@ -29,6 +29,7 @@ public interface SongRepository extends JpaRepository<Song, Long> {
             "ORDER BY SUM(sl.total) DESC LIMIT 3")
     List<Song> findTopThreeSongsInSevenDays(@Param("sevenDays") LocalDate sevenDays);
 
+
     @Query("SELECT s FROM Song s JOIN s.genres g JOIN s.songListens sl " +
             "WHERE g.genreName LIKE %:national% AND sl.dateCreate >= :startOfWeek " +
             "GROUP BY s.songId " +
@@ -56,4 +57,32 @@ public interface SongRepository extends JpaRepository<Song, Long> {
             "GROUP BY s.songId " +
             "ORDER BY total_listens DESC LIMIT 100")
     List<Song> findTop100Songs();
+
+    @Query("""
+SELECT s FROM Song s 
+    LEFT JOIN s.songListens sl 
+    GROUP BY s 
+    ORDER BY SUM(sl.total) DESC
+""")
+    Page<Song> findSixSongBestListening(Pageable pageable);
+
+    @Query("""
+    SELECT s FROM Song s 
+    WHERE EXISTS (
+        SELECT 1 FROM UserListen ul 
+        WHERE ul.song = s AND ul.appUser.userId = :userId
+    )
+    OR EXISTS (
+        SELECT 1 FROM UserListen sl
+        JOIN sl.song.genres g
+        WHERE sl.appUser.userId = :userId
+        AND g MEMBER OF s.genres
+    )
+""")
+    Page<Song> findSuggestSongsByUserId(@Param("userId") Long userId, Pageable pageable);
+
+
+    @Query("SELECT s FROM Song s ORDER BY s.dateCreate DESC ")
+    Page<Song> findSongNewReleased(Pageable pageable);
+
 }

@@ -47,6 +47,10 @@ public class AlbumService implements IAlbumService {
         return albumRepository.findNewAlbumsWithNational(national);
     }
 
+    @Override
+    public Page<Album> getTopSixAlbumsBestListen(Pageable pageable) {
+        return albumRepository.findSixAlbumIsBestListenAndAlbumStatusIsFalse(pageable);
+    }
 
 
     @Override

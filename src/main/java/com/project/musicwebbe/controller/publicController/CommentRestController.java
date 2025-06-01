@@ -2,13 +2,16 @@ package com.project.musicwebbe.controller.publicController;
 
 import com.project.musicwebbe.dto.commentDTO.*;
 import com.project.musicwebbe.entities.Comment;
+import com.project.musicwebbe.entities.permission.AppUser;
 import com.project.musicwebbe.service.Comment.ICommentService;
+import com.project.musicwebbe.service.Comment.impl.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,13 +21,18 @@ import java.util.List;
 public class CommentRestController {
 
     @Autowired
-    private ICommentService commentService;
+    private ICommentService iCommentService;
+
+    @Autowired
+    private CommentService commentService;
+
+
 
     @GetMapping("/song/{songId}")
     public ResponseEntity<Page<CommentDTO>> getAllCommentBySongId(@PathVariable Long songId,
                                                                   @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> comments = commentService.searchAllBySongId(songId, pageable);
+        Page<Comment> comments = iCommentService.searchAllBySongId(songId, pageable);
         if (comments.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -36,7 +44,7 @@ public class CommentRestController {
     public ResponseEntity<Page<CommentDTO>> getReplies(@PathVariable Long commentId,
                                                        @RequestParam(name = "size", defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> repliesPage = commentService.findByParentCommentId(commentId, pageable);
+        Page<Comment> repliesPage = iCommentService.findByParentCommentId(commentId, pageable);
 
         if (repliesPage.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -75,7 +83,7 @@ public class CommentRestController {
         }
 
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt")); // Số lượng replies trên mỗi trang
-        Page<Comment> repliesPage = commentService.findByParentCommentId(comment.getCommentId(), pageable);
+        Page<Comment> repliesPage = iCommentService.findByParentCommentId(comment.getCommentId(), pageable);
 
         if (repliesPage != null && !repliesPage.isEmpty()) {
             Page<CommentDTO> replies = repliesPage.map(this::convertToCommentDTO);

@@ -41,4 +41,13 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
             "WHERE f.appUser.userId = :userId ")
     Page<Album> findAllFavoriteAlbumsByUserId(@Param("userId")Long userId, Pageable pageable);
 
+
+    @Query("SELECT a FROM Album a " +
+            "WHERE a.albumStatus = false " +
+            "ORDER BY (SELECT SUM(sl.total) FROM Song s JOIN s.songListens sl WHERE s.album = a) DESC")
+    Page<Album> findSixAlbumIsBestListenAndAlbumStatusIsFalse(Pageable pageable);
+
+
+
+
 }

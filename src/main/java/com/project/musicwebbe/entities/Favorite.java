@@ -20,6 +20,9 @@ public class Favorite {
     @Column(name = "favorite_id")
     private Long favoriteId;
 
+    @Column(name = "added_at")
+    private LocalDateTime addedAt;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private AppUser appUser;
@@ -27,8 +30,5 @@ public class Favorite {
     @ManyToOne
     @JoinColumn(name = "song_id")
     private Song song;
-
-    @Column(name = "added_at")
-    private LocalDateTime addedAt;
 
 }

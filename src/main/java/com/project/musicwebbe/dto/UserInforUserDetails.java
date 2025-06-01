@@ -28,6 +28,14 @@ public class UserInforUserDetails implements UserDetails {
         }
     }
 
+    public AppUser getUser() {
+        return this.user;
+    }
+
+    public Long getUserId() {
+        return this.user.getUserId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

@@ -1,14 +1,19 @@
 package com.project.musicwebbe.controller.auth;
 
+import com.project.musicwebbe.dto.UserInforUserDetails;
 import com.project.musicwebbe.dto.commentDTO.*;
 import com.project.musicwebbe.entities.Comment;
+import com.project.musicwebbe.entities.permission.AppUser;
 import com.project.musicwebbe.service.Comment.ICommentService;
+import com.project.musicwebbe.service.Comment.impl.CommentService;
 import com.project.musicwebbe.service.commentEmotion.*;
 import com.project.musicwebbe.service.permission.IUserService;
+import com.project.musicwebbe.util.ConvertEntityToDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -19,7 +24,10 @@ import java.util.List;
 public class CommentAuthRestController {
 
     @Autowired
-    private ICommentService commentService;
+    private ICommentService iCommentService;
+
+    @Autowired
+    private CommentService commentService;
 
     @Autowired
     private ICommentEmotionService commentEmotionService;
@@ -42,11 +50,14 @@ public class CommentAuthRestController {
     @Autowired
     private IUserService userService;
 
+    @Autowired
+    private ConvertEntityToDTO convertEntityToDTO;
+
     @GetMapping("/song/{songId}")
     public ResponseEntity<Page<CommentDTO>> getAllCommentBySongId(@PathVariable Long songId,
                                                                 @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> comments = commentService.searchAllBySongId(songId, pageable);
+        Page<Comment> comments = iCommentService.searchAllBySongId(songId, pageable);
         if (comments.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -58,7 +69,7 @@ public class CommentAuthRestController {
     public ResponseEntity<Page<CommentDTO>> getReplies(@PathVariable Long commentId,
                                                        @RequestParam(name = "size", defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> repliesPage = commentService.findByParentCommentId(commentId, pageable);
+        Page<Comment> repliesPage = iCommentService.findByParentCommentId(commentId, pageable);
 
         if (repliesPage.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -78,9 +89,19 @@ public class CommentAuthRestController {
         }
         comment.setUser(user);
         comment.setCreatedAt(LocalDateTime.now());
-        commentService.save(comment);
+        iCommentService.save(comment);
         return ResponseEntity.ok(comment);
     }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId,
+                                           @AuthenticationPrincipal UserInforUserDetails userDetails) {
+        Long userId = userDetails.getUser().getUserId();
+        commentService.softDeleteComment(commentId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+
 
     @PostMapping("/{commentId}/like")
     public ResponseEntity<Void> likeComment(@PathVariable Long commentId, @RequestParam(name = "userId") Long userId) {
@@ -147,7 +168,7 @@ public class CommentAuthRestController {
         }
 
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt")); // Số lượng replies trên mỗi trang
-        Page<Comment> repliesPage = commentService.findByParentCommentId(comment.getCommentId(), pageable);
+        Page<Comment> repliesPage = iCommentService.findByParentCommentId(comment.getCommentId(), pageable);
 
         if (repliesPage != null && !repliesPage.isEmpty()) {
             Page<CommentDTO> replies = repliesPage.map(this::convertToCommentDTO);
@@ -233,8 +254,6 @@ public class CommentAuthRestController {
                             .build()).toList();
             commentDTO.setHearts(dislikes);
         }
-
-        // Chuyển đổi các entity liên quan sang DTO tương ứng nếu cần
         return commentDTO;
     }
 

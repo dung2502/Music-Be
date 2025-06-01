@@ -59,4 +59,15 @@ public class Comment {
 
     private LocalDateTime createdAt;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
 }

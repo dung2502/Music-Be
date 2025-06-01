@@ -52,7 +52,7 @@ public class UserRestController {
             page = 0;
         }
 
-        Page<AppUser> customers = userService.searchByFullNameIfProvidedAndExcludeRoleAdmin( fullName, PageRequest.of(page, 10));
+        Page<AppUser> customers = userService.searchByFullNameIfProvidedAndExcludeRoleAdmin( fullName, PageRequest.of(page, 6));
 
         Page<UserDTO> customersDTO = customers.map(convertEntityToDTO::convertToUserDTO);
         return ResponseEntity.ok(customersDTO);
@@ -101,6 +101,7 @@ public class UserRestController {
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
         AuthenticationResponse response = userService.saveUser(appUserRequest);
+
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -111,7 +112,7 @@ public class UserRestController {
      * @param appUserRequest The request containing updated user details.
      * @return A {@link ResponseEntity} containing the {@link AuthenticationResponse} with the status of the update.
      */
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @Validated @RequestBody AppUserRequest appUserRequest,
                                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

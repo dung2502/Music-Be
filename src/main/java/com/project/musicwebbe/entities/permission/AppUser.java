@@ -98,6 +98,15 @@ public class AppUser implements Serializable {
     @Column(name = "enabled", length = 1)
     private Boolean enabled;
 
+    @Column(name = "is_vip")
+    private Boolean isVip = false;
+
+    @Column(name = "vip_expired_date")
+    private LocalDateTime vipExpiredDate;
+
+    @OneToMany(mappedBy = "appUser")
+    private List<Payment> payments;
+
     public AppUser(String email, String password, Set<AppRole> roles, String userCode, LocalDateTime dateCreate,
                    String fullName, Integer gender, LocalDate dateOfBirth, String phoneNumber, String address,
                    Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired, Boolean enabled) {

@@ -6,7 +6,9 @@ import com.project.musicwebbe.service.Comment.ICommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,8 +35,23 @@ public class CommentService implements ICommentService {
 
     @Override
     public Page<Comment> findByParentCommentId(Long parentCommentId, Pageable pageable) {
-        return commentRepository.findByParentCommentCommentId(parentCommentId, pageable);
+        return commentRepository.findByParentCommentId(parentCommentId, pageable);
     }
+
+    @Transactional
+    public void softDeleteComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        if (!comment.getUser().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Bạn không có quyền xóa comment này");
+        }
+
+        comment.setIsDeleted(true);
+        commentRepository.save(comment);
+    }
+
+
 
     @Override
     public Comment findById(Long commentId) {

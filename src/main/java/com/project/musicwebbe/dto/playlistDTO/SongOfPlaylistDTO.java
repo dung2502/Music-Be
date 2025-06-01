@@ -42,4 +42,5 @@ public class SongOfPlaylistDTO {
 
     private List<ArtistOfSongDTO> artists;
 
+
 }

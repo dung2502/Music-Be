@@ -116,7 +116,7 @@ public class ArtistAuthRestController {
 
 
     @PutMapping("/{artistId}")
-    public ResponseEntity<?> updateAlbum(@PathVariable Long artistId, @Validated @RequestBody Artist artist) {
+    public ResponseEntity<?> updateArtist(@PathVariable Long artistId, @Validated @RequestBody Artist artist) {
         var artistEntity = artistService.findById(artistId);
         if (artistEntity == null) {
             return ResponseEntity.notFound().build();

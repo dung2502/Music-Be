@@ -92,4 +92,20 @@ public class SongRestController {
         return ResponseEntity.ok(convertEntityToDTO.convertToSongDTO(song));
     }
 
+    @GetMapping("/top-6-most-listened")
+    public ResponseEntity<Page<SongDTO>> getTopSixMostListenedSongs() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+        Page<Song> songs = songService.findSixSongBestListening(pageRequest);
+        Page<SongDTO> songDTOS = songs.map(convertEntityToDTO::convertToSongDTO);
+        return ResponseEntity.ok(songDTOS);
+    }
+
+    @GetMapping("/song-new-released")
+    public ResponseEntity<Page<SongDTO>> getSongNewReleased() {
+        PageRequest pageRequest = PageRequest.of(0, 9);
+        Page<Song> songs = songService.findSongNewReleased(pageRequest);
+        Page<SongDTO> songDTOS = songs.map(convertEntityToDTO::convertToSongDTO);
+        return ResponseEntity.ok(songDTOS);
+    }
+
 }

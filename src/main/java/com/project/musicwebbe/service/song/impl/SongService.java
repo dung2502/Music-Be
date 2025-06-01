@@ -54,6 +54,21 @@ public class SongService implements ISongService {
         return songs;
     }
 
+    @Override
+    public Page<Song> findSixSongBestListening(Pageable pageable) {
+        return songRepository.findSixSongBestListening(pageable);
+    }
+
+    @Override
+    public Page<Song> findSuggestSongsByUserId(Long userId, Pageable pageable) {
+        return songRepository.findSuggestSongsByUserId(userId, pageable);
+    }
+
+    @Override
+    public Page<Song> findSongNewReleased(Pageable pageable) {
+        return songRepository.findSongNewReleased(pageable);
+    }
+
 
     @Override
     public Page<Song> findAllTopSongByNational(String national, Pageable pageable) {

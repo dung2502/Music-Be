@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     Page<Playlist> findAllByPlaylistNameContainingAndPlaylistStatusIsFalse(String playlistName, Pageable pageable);
@@ -28,4 +30,8 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     @Query("SELECT p from Playlist p JOIN p.favoritePlaylists f " +
             "WHERE f.appUser.userId = :userId ")
     Page<Playlist> findAllFavoritePlayListsByUserId(@Param("userId")Long userId, Pageable pageable);
+
+    @Query("SELECT p FROM Playlist p WHERE p.appUser.userId = :userId")
+    List<Playlist> findAllPlayListsByUserId(@Param("userId") Long userId);
+
 }

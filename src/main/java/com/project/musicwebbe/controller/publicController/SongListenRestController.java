@@ -40,4 +40,18 @@ public class SongListenRestController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/total")
+    public ResponseEntity<?> getTotalListen(@RequestParam Long songId) {
+        Song song = songService.findById(songId);
+        if (song == null) {
+            return ResponseEntity.status(404).body("Song not found");
+        }
+
+        Integer totalListen = songListenService.getTotalListenBySongId(songId);
+        if (totalListen == null) {
+            totalListen = 0;
+        }
+
+        return ResponseEntity.ok(totalListen);
+    }
 }

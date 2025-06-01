@@ -25,4 +25,10 @@ public interface ISongService extends IGeneralService<Song> {
     List<Song> findTop100Songs();
 
     List<Song> findTopThreeSongsInSevenDays();
+
+    Page<Song> findSixSongBestListening(Pageable pageable);
+
+    Page<Song> findSuggestSongsByUserId(Long userId, Pageable pageable);
+
+    Page<Song> findSongNewReleased(Pageable pageable);
 }

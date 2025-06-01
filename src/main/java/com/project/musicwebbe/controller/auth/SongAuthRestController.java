@@ -121,6 +121,23 @@ public class SongAuthRestController {
         return ResponseEntity.ok(song);
     }
 
+    @GetMapping("/suggestions")
+    public ResponseEntity<Page<SongDTO>> getSuggestedSongs(
+    ) {
+        AppUser currentUser = getCurrentUser.getUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
 
+        PageRequest pageRequest = PageRequest.of(0, 9);
+        Page<Song> suggestedSongs = songService.findSuggestSongsByUserId(currentUser.getUserId(), pageRequest);
+
+        if (suggestedSongs.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        Page<SongDTO> songDTOS = suggestedSongs.map(convertEntityToDTO::convertToSongDTO);
+        return ResponseEntity.ok(songDTOS);
+    }
 
 }

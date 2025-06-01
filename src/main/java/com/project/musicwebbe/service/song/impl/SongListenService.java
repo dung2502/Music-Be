@@ -46,4 +46,9 @@ public class SongListenService implements ISongListenService {
     public SongListen findBySongIdToday(Long songId) {
         return songListenRepository.findBySongSongIdAndDateCreate(songId, LocalDate.now());
     }
+
+    @Override
+    public Integer getTotalListenBySongId(Long songId) {
+        return songListenRepository.getTotalListenBySongId(songId);
+    }
 }

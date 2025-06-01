@@ -5,4 +5,6 @@ import com.project.musicwebbe.service.IGeneralService;
 
 public interface ISongListenService extends IGeneralService<SongListen> {
     SongListen findBySongIdToday(Long songId);;
+
+    Integer getTotalListenBySongId(Long songId);
 }

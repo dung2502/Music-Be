@@ -30,7 +30,6 @@ public class AppUserRequest implements Validator {
 
     private Set<AppRole> roles;
 
-    @NotBlank(message = "Mã nhân viên không được để trống!")
     @Pattern(regexp = "^(NV|CU)\\d{4}$", message="Mã nhân viên phải được bắt đầu bằng NV và kết thúc với 4 chữ số!")
     private String userCode;
 

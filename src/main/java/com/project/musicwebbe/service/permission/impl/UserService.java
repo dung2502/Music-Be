@@ -104,6 +104,7 @@ public class UserService implements IUserService {
      * @param appUserRequest The {@link AppUserRequest} containing user details to save.
      * @return An {@link AuthenticationResponse} indicating the status of the save operation.
      */
+
     @Override
     public AuthenticationResponse saveUser(AppUserRequest appUserRequest) {
         String email = appUserRequest.getEmail();
@@ -156,34 +157,45 @@ public class UserService implements IUserService {
                     .message("Không tìm thấy kết quả!")
                     .build();
         }
+
         AppUser appUser = user.get();
-        if (appUserRequest.getPassword() != null || !appUserRequest.getPassword().isEmpty()) {
+
+        // Nếu password được gửi lên, mới cập nhật
+        if (appUserRequest.getPassword() != null && !appUserRequest.getPassword().isEmpty()) {
             appUser.setPassword(passwordEncoder.encode(appUserRequest.getPassword()));
         }
-        appUser.setUserCode(appUserRequest.getUserCode());
-        appUser.setFullName(appUserRequest.getFullName());
-        appUser.setGender(appUserRequest.getGender());
-        appUser.setDateOfBirth(appUserRequest.getDateOfBirth());
-        appUser.setPhoneNumber(appUserRequest.getPhoneNumber());
-        appUser.setAddress(appUserRequest.getAddress());
-        appUser.setRoles(appUserRequest.getRoles());
-        appUser.setAccountNonExpired(appUserRequest.getAccountNonExpired());
-        appUser.setCredentialsNonExpired(appUserRequest.getCredentialsNonExpired());
-        appUser.setAccountNonLocked(appUserRequest.getAccountNonLocked());
-        appUser.setEnabled(appUserRequest.getEnabled());
+
+        // Cập nhật các trường có giá trị
+        if (appUserRequest.getUserCode() != null) appUser.setUserCode(appUserRequest.getUserCode());
+        if (appUserRequest.getFullName() != null) appUser.setFullName(appUserRequest.getFullName());
+        if (appUserRequest.getGender() != null) appUser.setGender(appUserRequest.getGender());
+        if (appUserRequest.getDateOfBirth() != null) appUser.setDateOfBirth(appUserRequest.getDateOfBirth());
+        if (appUserRequest.getPhoneNumber() != null) appUser.setPhoneNumber(appUserRequest.getPhoneNumber());
+        if (appUserRequest.getAddress() != null) appUser.setAddress(appUserRequest.getAddress());
+        if (appUserRequest.getAvatar() != null) appUser.setAvatar(appUserRequest.getAvatar());
+
+        // roles, account flags: cập nhật nếu cần
+        if (appUserRequest.getRoles() != null) appUser.setRoles(appUserRequest.getRoles());
+        if (appUserRequest.getAccountNonExpired() != null) appUser.setAccountNonExpired(appUserRequest.getAccountNonExpired());
+        if (appUserRequest.getCredentialsNonExpired() != null) appUser.setCredentialsNonExpired(appUserRequest.getCredentialsNonExpired());
+        if (appUserRequest.getAccountNonLocked() != null) appUser.setAccountNonLocked(appUserRequest.getAccountNonLocked());
+        if (appUserRequest.getEnabled() != null) appUser.setEnabled(appUserRequest.getEnabled());
+
         try {
             userRepository.save(appUser);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return AuthenticationResponse.builder()
                     .statusCode(400)
-                    .message("Không thể cập nhật nhân viên, lỗi hệ thống!")
+                    .message("Không thể cập nhật người dùng, lỗi hệ thống!")
                     .build();
         }
+
         return AuthenticationResponse.builder()
                 .statusCode(200)
                 .message("Cập nhật thành công!")
                 .build();
     }
+
 
 
 }

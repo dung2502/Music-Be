@@ -34,6 +34,11 @@ public class PlaylistService implements IPlaylistService {
     }
 
     @Override
+    public List<Playlist> searchAllPlaylistsByUserId(Long userId) {
+        return playlistRepository.findAllPlayListsByUserId(userId);
+    }
+
+    @Override
     public Playlist findById(Long id) {
 
         return playlistRepository.findById(id).orElse(null);

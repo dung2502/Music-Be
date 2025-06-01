@@ -2,12 +2,21 @@ package com.project.musicwebbe.util;
 
 import com.project.musicwebbe.dto.albumDTO.*;
 import com.project.musicwebbe.dto.artistDTO.*;
+import com.project.musicwebbe.dto.commentDTO.*;
+import com.project.musicwebbe.dto.favoriteDTO.FavoriteDTOT;
+import com.project.musicwebbe.dto.paymentDTO.PaymentDTO;
+import com.project.musicwebbe.dto.paymentDTO.VipPackageDTO;
 import com.project.musicwebbe.dto.playlistDTO.*;
 import com.project.musicwebbe.dto.songDTO.*;
 import com.project.musicwebbe.dto.userDTO.UserDTO;
 import com.project.musicwebbe.entities.*;
 import com.project.musicwebbe.entities.permission.AppUser;
+import com.project.musicwebbe.service.Comment.ICommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,6 +26,9 @@ import java.util.stream.Collectors;
 public class ConvertEntityToDTO {
     @Autowired
     private GetCurrentUser getCurrentUser;
+
+    @Autowired
+    private ICommentService commentService;
 
     public AlbumDTO convertToAlbumDTO(Album album) {
         AlbumDTO albumDTO = new AlbumDTO();
@@ -237,6 +249,7 @@ public class ConvertEntityToDTO {
                                 .map(artist -> ArtistOfSongDTO.builder()
                                         .artistId(artist.getArtistId())
                                         .artistName(artist.getArtistName())
+                                        .avatar(artist.getAvatar())
                                         .build())
                                 .toList()
                                 : List.of();
@@ -304,6 +317,8 @@ public class ConvertEntityToDTO {
                 .avatar(appUser.getAvatar())
                 .phoneNumber(appUser.getPhoneNumber())
                 .address(appUser.getAddress())
+                .isVip(appUser.getIsVip())
+                .vipExpiredDate(appUser.getVipExpiredDate())
                 .build();
     }
 
@@ -320,6 +335,167 @@ public class ConvertEntityToDTO {
                 .song(convertToSongDTO(userListen.getSong()))
                 .build();
     }
+
+    public PaymentDTO convertToPaymentDTO(Payment payment) {
+        if (payment == null) return null;
+
+        VipPackageDTO vipPackageDTO = null;
+        if (payment.getVipPackage() != null) {
+            vipPackageDTO = VipPackageDTO.builder()
+                    .packageId(payment.getVipPackage().getPackageId())
+                    .name(payment.getVipPackage().getName())
+                    .durationMonths(payment.getVipPackage().getDurationMonths())
+                    .price(payment.getVipPackage().getPrice())
+                    .build();
+        }
+
+        return PaymentDTO.builder()
+                .paymentId(payment.getPaymentId())
+                .userId(payment.getAppUser() != null ? payment.getAppUser().getUserId() : null)
+                .fullName(payment.getAppUser() != null ? payment.getAppUser().getFullName() : null)
+                .amount(payment.getAmount())
+                .paymentTime(payment.getPaymentTime())
+                .paymentMethod(payment.getPaymentMethod())
+                .transactionCode(payment.getTransactionCode())
+                .paymentStatus(payment.getPaymentStatus())
+                .description(payment.getDescription())
+                .vipPackage(vipPackageDTO)
+                .build();
+    }
+
+    public FavoriteDTOT convertToFavoriteDTO(Favorite favorite) {
+        if (favorite == null) return null;
+
+        return FavoriteDTOT.builder()
+                .favoriteId(favorite.getFavoriteId())
+                .addedAt(favorite.getAddedAt())
+                .userFav(SimpleUserDTO.builder()
+                        .userId(favorite.getAppUser().getUserId())
+                        .fullName(favorite.getAppUser().getFullName())
+                        .build())
+                .favoriteSong(convertToSongDTO(favorite.getSong()))
+                .build();
+    }
+
+
+    private CommentDTO convertToCommentDTO(Comment comment) {
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setCommentId(comment.getCommentId());
+        commentDTO.setContent(comment.getContent());
+        commentDTO.setCreatedAt(comment.getCreatedAt());
+        ;
+        if (comment.getUser() != null) {
+            commentDTO.setUser(UserOfCommentDTO.builder()
+                    .userId(comment.getUser().getUserId())
+                    .email(comment.getUser().getEmail())
+                    .fullName(comment.getUser().getFullName())
+                    .avatar(comment.getUser().getAvatar())
+                    .userCode(comment.getUser().getUserCode())
+                    .build());
+        }
+
+        if (comment.getSong() != null) {
+            commentDTO.setSong(SongOfCommentDTO.builder()
+                    .songId(comment.getSong().getSongId())
+                    .songUrl(comment.getSong().getSongUrl())
+                    .title(comment.getSong().getTitle())
+                    .dateCreate(comment.getSong().getDateCreate())
+                    .lyrics(comment.getSong().getLyrics())
+                    .coverImageUrl(comment.getSong().getCoverImageUrl())
+                    .duration(comment.getSong().getDuration())
+                    .build());
+        }
+
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt")); // Số lượng replies trên mỗi trang
+        Page<Comment> repliesPage = commentService.findByParentCommentId(comment.getCommentId(), pageable);
+
+        if (repliesPage != null && !repliesPage.isEmpty()) {
+            Page<CommentDTO> replies = repliesPage.map(this::convertToCommentDTO);
+            commentDTO.setReplies(replies);
+        }
+
+        if (comment.getLikes() != null && !comment.getLikes().isEmpty()) {
+            List<CommentLikeDTO> likes = comment.getLikes().stream()
+                    .map(commentLike -> CommentLikeDTO.builder()
+                            .likeId(commentLike.getEmotionId())
+                            .user(UserOfCommentDTO.builder()
+                                    .userId(commentLike.getUser().getUserId())
+                                    .email(commentLike.getUser().getEmail())
+                                    .fullName(commentLike.getUser().getFullName())
+                                    .avatar(commentLike.getUser().getAvatar())
+                                    .userCode(commentLike.getUser().getUserCode())
+                                    .build())
+                            .likedAt(commentLike.getCreatedAt())
+                            .build()).toList();
+            commentDTO.setLikes(likes);
+        }
+
+        if (comment.getDislikes() != null && !comment.getDislikes().isEmpty()) {
+            List<CommentDislikeDTO> dislikes = comment.getDislikes().stream()
+                    .map(commentDislike -> CommentDislikeDTO.builder()
+                            .dislikeId(commentDislike.getEmotionId())
+                            .user(UserOfCommentDTO.builder()
+                                    .userId(commentDislike.getUser().getUserId())
+                                    .email(commentDislike.getUser().getEmail())
+                                    .fullName(commentDislike.getUser().getFullName())
+                                    .avatar(commentDislike.getUser().getAvatar())
+                                    .userCode(commentDislike.getUser().getUserCode())
+                                    .build())
+                            .dislikedAt(commentDislike.getCreatedAt())
+                            .build()).toList();
+            commentDTO.setDislikes(dislikes);
+        }
+
+        if (comment.getHahas() != null && !comment.getHahas().isEmpty()) {
+            List<CommentHahaDTO> hahaDTOS = comment.getHahas().stream()
+                    .map(commentHaha -> CommentHahaDTO.builder()
+                            .hahaId(commentHaha.getEmotionId())
+                            .user(UserOfCommentDTO.builder()
+                                    .userId(commentHaha.getUser().getUserId())
+                                    .email(commentHaha.getUser().getEmail())
+                                    .fullName(commentHaha.getUser().getFullName())
+                                    .avatar(commentHaha.getUser().getAvatar())
+                                    .userCode(commentHaha.getUser().getUserCode())
+                                    .build())
+                            .hahaAt(commentHaha.getCreatedAt())
+                            .build()).toList();
+            commentDTO.setHahas(hahaDTOS);
+        }
+
+        if (comment.getWows() != null && !comment.getWows().isEmpty()) {
+            List<CommentWowDTO> wowDTOS = comment.getWows().stream()
+                    .map(commentWow -> CommentWowDTO.builder()
+                            .wowId(commentWow.getEmotionId())
+                            .user(UserOfCommentDTO.builder()
+                                    .userId(commentWow.getUser().getUserId())
+                                    .email(commentWow.getUser().getEmail())
+                                    .fullName(commentWow.getUser().getFullName())
+                                    .avatar(commentWow.getUser().getAvatar())
+                                    .userCode(commentWow.getUser().getUserCode())
+                                    .build())
+                            .wowAt(commentWow.getCreatedAt())
+                            .build()).toList();
+            commentDTO.setWows(wowDTOS);
+        }
+
+        if (comment.getHearts() != null && !comment.getHearts().isEmpty()) {
+            List<CommentHeartDTO> dislikes = comment.getHearts().stream()
+                    .map(commentHeart -> CommentHeartDTO.builder()
+                            .heartId(commentHeart.getEmotionId())
+                            .user(UserOfCommentDTO.builder()
+                                    .userId(commentHeart.getUser().getUserId())
+                                    .email(commentHeart.getUser().getEmail())
+                                    .fullName(commentHeart.getUser().getFullName())
+                                    .avatar(commentHeart.getUser().getAvatar())
+                                    .userCode(commentHeart.getUser().getUserCode())
+                                    .build())
+                            .heartedAt(commentHeart.getCreatedAt())
+                            .build()).toList();
+            commentDTO.setHearts(dislikes);
+        }
+        return commentDTO;
+    }
+
 
 
 }

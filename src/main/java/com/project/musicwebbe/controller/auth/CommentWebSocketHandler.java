@@ -5,8 +5,11 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+
+
 @Controller
 public class CommentWebSocketHandler {
+
     @MessageMapping("/sendComment")
     @SendTo("/topic/createComment")
     public Comment sendAllComment(Comment comment){
@@ -18,4 +21,5 @@ public class CommentWebSocketHandler {
     public String sendComment(String message){
         return message ;
     }
+
 }

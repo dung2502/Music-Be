@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác nhận thanh toán - PlayMyMusic</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f2f2f7;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            padding: 40px 0;
+        }
+
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: 180px;
+            height: auto;
+        }
+
+        .header {
+            text-align: center;
+            color: #2e7d32;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .emoji {
+            font-size: 32px;
+        }
+
+        p {
+            line-height: 1.6;
+            font-size: 16px;
+            margin: 12px 0;
+        }
+
+        strong {
+            color: #111;
+        }
+
+        .button-wrapper {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 28px;
+            background-color: #4CAF50;
+            color: #fff !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #43a047;
+        }
+
+        .support {
+            font-size: 14px;
+            color: #666;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 600px) {
+            .email-wrapper {
+                padding: 20px;
+            }
+
+            .button {
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="email-wrapper">
+        <div class="logo">
+            <img src="cid:logoMusic" alt="PlayMyMusic Logo" style="width: 180px; height: auto;">
+        </div>
+
+        <div class="emoji" style="text-align: center;">🎉</div>
+        <h2 class="header">Thanh toán thành công!</h2>
+
+        <p>Xin chào <strong>{{userName}}</strong>,</p>
+
+        <p>Cảm ơn bạn đã đăng ký gói <strong>{{vipPackage}}</strong> của <strong>PlayMyMusic</strong>.</p>
+
+        <p>Tài khoản của bạn đã được nâng cấp lên tài khoản <span style="color: #4CAF50;"><strong>VIP</strong></span> và sẽ hết hạn vào ngày <strong>{{expiredDate}}</strong>.</p>
+
+        <p>Chúng tôi hy vọng bạn sẽ có những trải nghiệm âm nhạc tuyệt vời cùng PlayMyMusic! 🎶</p>
+
+        <div class="button-wrapper">
+            <a href="http://localhost:3000" class="button">Truy cập ứng dụng</a>
+        </div>
+
+        <div class="support">
+            Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi.<br><br>
+            Trân trọng,<br><strong>Đội ngũ PlayMyMusic</strong>
+        </div>
+
+        <div class="footer">
+            © 2025 PlayMyMusic. All rights reserved.
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -37,6 +37,19 @@ public class AlbumRestController {
         return ResponseEntity.ok(albumDTOs);
     }
 
+    @GetMapping("/top-albums")
+    public ResponseEntity<Page<AlbumDTO>> getTopListenedAlbums() {
+        PageRequest pageRequest = PageRequest.of(0, 6);
+        Page<Album> albums = albumService.getTopSixAlbumsBestListen(pageRequest);
+        Page<AlbumDTO> albumDTOs = albums.map(convertEntityToDTO::convertToAlbumDTO);
+
+        if (albumDTOs.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(albumDTOs);
+    }
+
     @GetMapping("/new-albums-release")
     public ResponseEntity<List<AlbumDTO>> getAllNewAlbumsRelease(@RequestParam(name = "national", defaultValue = "") String national) {
         List<Album> albums = albumService.findNewAlbumsWithNational(national);

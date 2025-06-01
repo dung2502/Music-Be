@@ -33,8 +33,8 @@ public class SecurityConfiguration {
                         "/api/auth/register", "/api/auth/users/roles",
                         "/api/auth/oauth2-login","/api/auth/logout").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                .requestMatchers("/api/**").permitAll()  // Đặt sau cùng
+                .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
         )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -50,12 +50,11 @@ public class SecurityConfiguration {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(EnvUtils.getAllowedOrigins().toArray(new String[0]))
+                        .allowedOrigins("http://localhost:3000","http://localhost:3001")
                         .allowCredentials(true)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
             }
         };
     }
-
 }

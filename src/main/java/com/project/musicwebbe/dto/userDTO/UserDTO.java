@@ -1,5 +1,6 @@
 package com.project.musicwebbe.dto.userDTO;
 
+import com.project.musicwebbe.entities.Payment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -33,5 +35,9 @@ public class UserDTO {
     private String phoneNumber;
 
     private String address;
+
+    private LocalDateTime vipExpiredDate;
+
+    private Boolean isVip = false;
 
 }

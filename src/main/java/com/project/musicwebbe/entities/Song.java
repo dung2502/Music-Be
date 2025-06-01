@@ -2,7 +2,10 @@ package com.project.musicwebbe.entities;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +33,7 @@ public class Song {
     @Column(name = "date_create")
     private LocalDateTime dateCreate;
 
+    @NotBlank(message = "Tên bài hát không được để trống!")
     @Column(name = "lyrics",columnDefinition = "TEXT")
     private String lyrics;
 
@@ -38,9 +42,11 @@ public class Song {
     private Album album;
 
     @NotBlank(message = "Bài hát không được để trống!")
-    private String songUrl; // URL tới file nhạc
+    private String songUrl;
 
-    private int duration; // Thời lượng bài hát tính bằng giây
+
+    @Min(value = 1, message = "Thời lượng phải lớn hơn 0!")
+    private int duration;
 
     @NotBlank(message = "Ảnh đại diện không được để trống!")
     private String coverImageUrl;
@@ -54,8 +60,10 @@ public class Song {
             joinColumns = @JoinColumn(name = "song_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
+    @NotEmpty(message = "Thể loại không được để trống!")
     private List<Genre> genres;
 
+    @NotEmpty(message = "Ca sĩ không được để trống!")
     @ManyToMany()
     @JoinTable(
             name = "artist_song",
